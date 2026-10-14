@@ -17,6 +17,7 @@ Future<void> main() async {
       // ── Theme ──
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
 
       // ── Navigation ──
       initialRoute: AppPages.INITIAL,
