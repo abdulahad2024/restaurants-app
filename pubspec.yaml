@@ -36,6 +36,9 @@ dependencies:
   cupertino_icons: ^1.0.8
   get_cli: ^1.9.1
   get: ^4.7.3
+  hugeicons: ^1.2.0
+  font_awesome_flutter: ^11.0.0
+  ionicons: ^0.2.3
 
 dev_dependencies:
   flutter_test:

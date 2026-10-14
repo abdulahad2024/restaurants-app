@@ -58,7 +58,7 @@ class CustomTextFromField extends StatefulWidget {
   final String? errorText; // e.g. server-side error
 
   // ── Icons ──
-  final IconData? prefixIcon;
+  final Widget? prefixIcon;
   final String? prefixText; // e.g. "+880"
   final Widget? suffixIcon;
 
@@ -123,7 +123,7 @@ class CustomTextFromField extends StatefulWidget {
       hint: hint,
       isRequired: isRequired,
       enabled: enabled,
-      prefixIcon: Icons.email_outlined,
+      prefixIcon: Icon(Icons.email_outlined),
       keyboardType: TextInputType.emailAddress,
       textInputAction: textInputAction,
       autofillHints: const [AutofillHints.email],
@@ -158,7 +158,7 @@ class CustomTextFromField extends StatefulWidget {
       isPassword: true,
       isRequired: isRequired,
       enabled: enabled,
-      prefixIcon: Icons.lock_outline,
+      prefixIcon: Icon(Icons.lock_outline),
       textInputAction: textInputAction,
       autofillHints: [
         isNewPassword ? AutofillHints.newPassword : AutofillHints.password,
@@ -191,7 +191,7 @@ class CustomTextFromField extends StatefulWidget {
       hint: hint,
       isRequired: isRequired,
       enabled: enabled,
-      prefixIcon: Icons.phone_outlined,
+      prefixIcon: Icon(Icons.phone_android_outlined),
       keyboardType: TextInputType.phone,
       textInputAction: textInputAction,
       maxLength: 14,
@@ -218,7 +218,7 @@ class CustomTextFromField extends StatefulWidget {
       focusNode: focusNode,
       hint: hint,
       autofocus: autofocus,
-      prefixIcon: Icons.search,
+      prefixIcon:   Icon(Icons.search),
       showClearButton: true,
       keyboardType: TextInputType.text,
       textInputAction: TextInputAction.search,
@@ -418,9 +418,7 @@ class _CustomTextFromFieldState extends State<CustomTextFromField> {
         helperMaxLines: 2,
         errorMaxLines: 3,
         counterText: widget.showCounter ? null : '',
-        prefixIcon: widget.prefixIcon != null
-            ? Icon(widget.prefixIcon, size: AppSize.iconMd)
-            : null,
+        prefixIcon: widget.prefixIcon,
         prefixText: widget.prefixText,
         suffixIcon: _buildSuffix(),
         filled: widget.fillColor != null ? true : null,
