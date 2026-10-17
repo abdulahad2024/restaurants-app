@@ -7,6 +7,6 @@ class AppConfig {
 
   static String appAuthor = "Abdul Ahad";
 
-  static String baseUrl = "";
+  static String baseUrl = "http://192.168.0.105:8000";
 
 }
