@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 class AppColor {
   AppColor._(); // Prevent instantiation
 
-  // ───────────────────────── Brand ─────────────────────────
-  static const Color primary = Color(0xFF2563EB);
-  static const Color primaryLight = Color(0xFF60A5FA);
-  static const Color primaryDark = Color(0xFF1E40AF);
-  static const Color primarySurface = Color(0xFFEFF6FF); // light tint bg
+// ───────────────────────── Brand ─────────────────────────
+  static const Color primary = Color(0xFFDC2626);      // Red
+  static const Color primaryLight = Color(0xFFF87171); // Light Red
+  static const Color primaryDark = Color(0xFF991B1B);  // Dark Red
+  static const Color primarySurface = Color(0xFFFEF2F2); // Light Red Surface BG
 
-  static const Color secondary = Color(0xFF7C3AED);
-  static const Color secondaryLight = Color(0xFFA78BFA);
-  static const Color secondaryDark = Color(0xFF5B21B6);
+  static const Color secondary = Color(0xFFE11D48);    // Rose / Crimson Red
+  static const Color secondaryLight = Color(0xFFFB7185); // Light Rose
+  static const Color secondaryDark = Color(0xFF9F1239);  // Dark Rose
 
   static const Color accent = Color(0xFFF59E0B);
   static const Color accentLight = Color(0xFFFCD34D);
