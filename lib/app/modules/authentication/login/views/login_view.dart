@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:restaurants_app/app/common/custom_widgets/custom_button.dart';
-import 'package:restaurants_app/app/common/custom_widgets/custom_dialog.dart';
-import 'package:restaurants_app/app/common/custom_widgets/custom_text_from_field.dart';
 import 'package:restaurants_app/app/core/constants/app_color.dart';
 import 'package:restaurants_app/app/core/constants/app_size..dart';
-import 'package:restaurants_app/app/core/utils/app_validators.dart';
-import 'package:restaurants_app/app/routes/app_pages.dart';
+import 'package:restaurants_app/app/modules/authentication/login/widgets/login_back_button.dart';
+import 'package:restaurants_app/app/modules/authentication/login/widgets/login_form_card.dart';
+import 'package:restaurants_app/app/modules/authentication/login/widgets/login_header_section.dart';
+import 'package:restaurants_app/app/modules/authentication/login/widgets/login_register_footer.dart';
+import 'package:restaurants_app/app/modules/authentication/login/widgets/login_reveal.dart';
+import 'package:restaurants_app/app/modules/authentication/welcome/widgets/welcome_background.dart';
 
 import '../controllers/login_controller.dart';
 
@@ -16,139 +18,120 @@ class LoginView extends GetView<LoginController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              padding: EdgeInsets.all(AppSize.xl),
-              child: Center(
-                child: ConstrainedBox(
-                  // বড় স্ক্রিন বা ট্যাবলেটে অতিরিক্ত চওড়া হওয়া রোধ করতে ম্যাক্স উইথ সেট করা হলো
-                  constraints: const BoxConstraints(maxWidth: 480),
-                  child: Form(
-                    key: controller.formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // ব্যাক বাটন
-                        IconButton(
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          icon: const Icon(Icons.arrow_back_ios, size: 24),
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final borderColor = isDark ? AppColor.darkBorder : AppColor.border;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        systemNavigationBarColor:
+        isDark ? AppColor.darkScaffold : AppColor.scaffold,
+        systemNavigationBarIconBrightness:
+        isDark ? Brightness.light : Brightness.dark,
+      ),
+      child: Scaffold(
+        body: Stack(
+          children: [
+            // Background
+            WelcomeBackground(isDark: isDark),
+
+            SafeArea(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: 480,
+                          minHeight: constraints.maxHeight,
                         ),
+                        child: Padding(
+                          padding: EdgeInsets.all(AppSize.xl),
+                          child: IntrinsicHeight(
+                            child: Form(
+                              key: controller.formKey,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Back button
+                                  LoginBackButton(
+                                    colorScheme: colorScheme,
+                                    borderColor: borderColor,
+                                  ),
 
-                        SizedBox(height: constraints.maxHeight * 0.02),
+                                  SizedBox(
+                                    height: constraints.maxHeight * 0.04,
+                                  ),
 
-                        // বড় হেডিং ("Login")
-                        const Text(
-                          'Login',
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: AppColor.primary, // থিম কালার
-                          ),
-                        ),
+                                  // Header
+                                  LoginReveal(
+                                    begin: 0.0,
+                                    child: LoginHeaderSection(
+                                      textTheme: textTheme,
+                                      colorScheme: colorScheme,
+                                    ),
+                                  ),
 
-                        SizedBox(height: AppSize.sm),
+                                  SizedBox(height: AppSize.xl),
 
-                        // সাবটাইটেল
-                        RichText(
-                          text: const TextSpan(
-                            text: 'Welcome back! Please enter your ',
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
-                            children: [
-                              TextSpan(
-                                text: 'details',
-                                style: TextStyle(
-                                  color: AppColor.primary,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              TextSpan(
-                                text: ' to sign in.',
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ],
-                          ),
-                        ),
+                                  // Form card
+                                  LoginReveal(
+                                    begin: 0.2,
+                                    child: LoginFormCard(
+                                      controller: controller,
+                                      colorScheme: colorScheme,
+                                      borderColor: borderColor,
+                                      isDark: isDark,
+                                    ),
+                                  ),
 
-                        SizedBox(height: AppSize.xl),
+                                  SizedBox(height: AppSize.xl),
 
-                        // ১. Email Address ফিল্ড
-                        CustomTextFromField(
-                          label: 'Email',
-                          hint: 'Ex: abc@example.com',
-                          isRequired: true,
-                          controller: controller.emailController,
-                          prefixIcon:  Icon(Ionicons.mail),
-                          keyboardType: TextInputType.emailAddress,
-                          validator: AppValidators.validateEmail,
-                          onChanged: (value) {
-                            print(value);
-                          },
-                        ),
+                                  // Login button
+                                  LoginReveal(
+                                    begin: 0.35,
+                                    child: Obx(() {
+                                      return CustomButton(
+                                        text: 'Login',
+                                        isLoading: controller.isLoading.value,
+                                        onPressed: () {
+                                          controller.login(context);
+                                        },
+                                      );
+                                    }),
+                                  ),
 
-                        SizedBox(height: AppSize.lg),
+                                  // Spacer to align footer at the bottom
+                                  const Spacer(),
+                                  const SizedBox(height: 24),
 
-                        CustomTextFromField(
-                          label: 'Your Password',
-                          hint: '••••••••',
-                          isRequired: true,
-                          isPassword: true,
-                          controller: controller.passwordController,
-                          validator: AppValidators.validatePassword,
-                          prefixIcon:  Icon(Ionicons.lockClosed),
-                          keyboardType: TextInputType.visiblePassword,
-                          onChanged: (value) {
-                            print(value);
-                          },
-                        ),
-
-                        SizedBox(height: AppSize.xl * 1.5),
-
-                        // Login বাটন
-                        CustomButton(
-                          text: 'Login',
-                          isLoading: controller.isLoading.value,
-                          onPressed: () {
-                            controller.login(context);
-                          },
-                        ),
-
-                        SizedBox(height: AppSize.lg),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(
-                              "Don’t have an account? ",
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                Get.offNamed(Routes.REGISTER);
-                              },
-                              child: const Text(
-                                'Register',
-                                style: TextStyle(
-                                  color: AppColor.primary,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                  // Register footer
+                                  LoginReveal(
+                                    begin: 0.5,
+                                    child: LoginRegisterFooter(
+                                      textTheme: textTheme,
+                                      colorScheme: colorScheme,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
+                          ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );

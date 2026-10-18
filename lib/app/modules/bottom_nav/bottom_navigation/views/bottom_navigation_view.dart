@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:restaurants_app/app/core/constants/app_color.dart';
+import 'package:restaurants_app/app/modules/authentication/profile/views/profile_view.dart';
+import 'package:restaurants_app/app/modules/home/home/views/home_view.dart';
 import '../controllers/bottom_navigation_controller.dart';
 
 class BottomNavigationView extends GetView<BottomNavigationController> {
@@ -10,86 +13,136 @@ class BottomNavigationView extends GetView<BottomNavigationController> {
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
-
-    // আপনার ট্যাবগুলোর স্ক্রিন লিস্ট এখানে যুক্ত করবেন
     final List<Widget> pages = [
-      const Center(child: Text('Home Screen')),
+      HomeView(),
       const Center(child: Text('Offers Screen')),
       const Center(child: Text('Orders Screen')),
-      const Center(child: Text('Account Screen')),
+      ProfileView(),
     ];
 
-    return Scaffold(
-      body: Obx(() => pages[controller.currentIndex.value]),
-
-      // মাঝখানের ফ্লোটিং বাটনটি নচের ভেতরে বসানোর জন্য
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => controller.onCenterButtonPressed(),
-        elevation: 4.0,
-        backgroundColor: isDark ? AppColor.darkSurface : AppColor.white,
-        shape: const CircleBorder(),
-        child: Icon(
-          Ionicons.add,
-          color: Colors.grey,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      systemNavigationBarColor:
+      isDark ? AppColor.darkScaffold : AppColor.scaffold,
+      systemNavigationBarIconBrightness:
+      isDark ? Brightness.light : Brightness.dark,
+    ),
+      child: Scaffold(
+        // Tab bodlale halka fade hoye page bodlay
+        body: Obx(
+              () => AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            switchInCurve: Curves.easeOut,
+            switchOutCurve: Curves.easeIn,
+            child: KeyedSubtree(
+              key: ValueKey(controller.currentIndex.value),
+              child: pages[controller.currentIndex.value],
+            ),
+          ),
         ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
-      // কার্ভড বটম অ্যাপ বার (Fully Responsive)
-      bottomNavigationBar: Obx(
-            () => BottomAppBar(
-          shape: const CircularNotchedRectangle(),
-          notchMargin: 8.0,
-          color: isDark ? AppColor.darkBottomNav : AppColor.bottomNav,
-          elevation: 10.0,
-          child: SizedBox(
-            height: 60,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // বাম পাশের ট্যাবগুলো (Expanded ব্যবহার করে রেসপন্সিভ করা হয়েছে)
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildNavItem(
-                          icon:  Ionicons.home,
-                          label: 'Home',
-                          index: 0,
-                        ),
-                        _buildNavItem(
-                          icon: Icons.local_offer_outlined,
-                          label: 'Offers',
-                          index: 1,
-                        ),
-                      ],
+        // Majhkhaner floating button, notch er bhitore boshe
+        floatingActionButton: Container(
+          height: 62,
+          width: 62,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColor.primary,
+                AppColor.primary.withValues(alpha: 0.78),
+              ],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColor.primary.withValues(alpha: 0.40),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: FloatingActionButton(
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              controller.onCenterButtonPressed();
+              print('Floating button pressed');
+            },
+            elevation: 0,
+            focusElevation: 0,
+            hoverElevation: 0,
+            highlightElevation: 0,
+            backgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            shape: const CircleBorder(),
+            child: const Icon(Ionicons.add, size: 30),
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
+        bottomNavigationBar: Obx(
+              () => BottomAppBar(
+            shape: const CircularNotchedRectangle(),
+            notchMargin: 9.0,
+            color: isDark ? AppColor.darkBottomNav : AppColor.bottomNav,
+            surfaceTintColor: Colors.transparent,
+            shadowColor: Colors.black.withValues(alpha: isDark ? 0.6 : 0.25),
+            elevation: 14.0,
+            padding: EdgeInsets.zero,
+            child: SizedBox(
+              height: 64,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  children: [
+                    // Bam pasher tab
+                    Expanded(
+                      child: Row(
+                        children: [
+                          _buildNavItem(
+                            icon: Ionicons.home,
+                            activeIcon: Ionicons.home,
+                            label: 'Home',
+                            index: 0,
+                          ),
+                          _buildNavItem(
+                            icon: Ionicons.pricetag,
+                            activeIcon: Ionicons.pricetag,
+                            label: 'Offers',
+                            index: 1,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
 
-                  // মাঝখানের ফাকা জায়গা (ফ্লোটিং বাটনের জন্য স্পেস)
-                  const SizedBox(width: 48),
+                    // Majhkhaner faka jayga (floating button er jonno)
+                    const SizedBox(width: 56),
 
-                  // ডান পাশের ট্যাবগুলো (Expanded ব্যবহার করে রেসপন্সিভ করা হয়েছে)
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildNavItem(
-                          icon: Icons.assignment_outlined,
-                          label: 'Orders',
-                          index: 2,
-                        ),
-                        _buildNavItem(
-                          icon: Icons.person_outline,
-                          label: 'Account',
-                          index: 3,
-                        ),
-                      ],
+                    // Dan pasher tab
+                    Expanded(
+                      child: Row(
+                        children: [
+                          _buildNavItem(
+                            icon: Ionicons.restaurant,
+                            activeIcon: Ionicons.receipt,
+                            label: 'Orders',
+                            index: 2,
+                          ),
+                          _buildNavItem(
+                            icon: Ionicons.person,
+                            activeIcon: Ionicons.person,
+                            label: 'Account',
+                            index: 3,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -98,38 +151,54 @@ class BottomNavigationView extends GetView<BottomNavigationController> {
     );
   }
 
-  // আলাদা আইটেম উইজেট তৈরির হেল্পার মেথড
+  // Alada nav item widget er helper method
   Widget _buildNavItem({
     required IconData icon,
+    required IconData activeIcon,
     required String label,
     required int index,
   }) {
-    bool isSelected = controller.currentIndex.value == index;
-    Color activeColor = AppColor.primary;
-    Color inactiveColor = AppColor.iconInactive;
+    final bool isSelected = controller.currentIndex.value == index;
+    const Color activeColor = AppColor.primary;
+    final Color inactiveColor = AppColor.iconInactive;
 
-    return InkWell(
-      onTap: () => controller.changeTab(index),
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          if (!isSelected) HapticFeedback.selectionClick();
+          controller.changeTab(index);
+        },
+        borderRadius: BorderRadius.circular(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              color: isSelected ? activeColor : inactiveColor,
-              size: 24,
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutCubic,
+              height: 30,
+              width: isSelected ? 52 : 30,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? activeColor.withValues(alpha: 0.14)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Icon(
+                isSelected ? activeIcon : icon,
+                color: isSelected ? activeColor : inactiveColor,
+                size: 22,
+              ),
             ),
             const SizedBox(height: 2),
-            Text(
-              label,
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 250),
               style: TextStyle(
                 color: isSelected ? activeColor : inactiveColor,
                 fontSize: 11,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),
+              child: Text(label),
             ),
           ],
         ),

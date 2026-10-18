@@ -14,9 +14,9 @@ abstract class Routes {
   static final HOME = _Paths.HOME;
   static const BOTTOM_NAVIGATION = _Paths.BOTTOM_NAVIGATION;
   static const ORDERS = _Paths.ORDERS;
+  static const WELCOME = _Paths.WELCOME;
+  static const ADD_FOODS = _Paths.ADD_FOODS;
 }
-
-
 
 abstract class _Paths {
   _Paths._();
@@ -31,4 +31,6 @@ abstract class _Paths {
   static const HOME = '/home';
   static const BOTTOM_NAVIGATION = '/bottom-navigation';
   static const ORDERS = '/orders';
+  static const WELCOME = '/welcome';
+  static const ADD_FOODS = '/add-foods';
 }

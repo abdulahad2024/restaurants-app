@@ -1,99 +1,119 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:restaurants_app/app/common/custom_widgets/custom_button.dart';
-import 'package:restaurants_app/app/common/custom_widgets/custom_text_from_field.dart';
-import 'package:restaurants_app/app/core/constants/app_size..dart';
-import 'package:restaurants_app/app/core/utils/app_validators.dart';
+import 'package:restaurants_app/app/core/constants/app_color.dart';
 import 'package:restaurants_app/app/modules/authentication/register/controllers/register_controller.dart';
 import 'package:restaurants_app/app/modules/authentication/register/widgets/register_header_widget.dart';
+import 'package:restaurants_app/app/modules/authentication/register/widgets/register_step_three_form_card.dart';
+import 'package:restaurants_app/app/modules/authentication/register/widgets/register_step_three_reveal.dart';
+import 'package:restaurants_app/app/modules/authentication/welcome/widgets/welcome_background.dart';
+
+import '../../../../core/constants/app_size..dart';
 
 class RegisterStepThreeView extends GetView<RegisterController> {
   const RegisterStepThreeView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              padding: EdgeInsets.all(AppSize.xl),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 480),
-                  child: Form(
-                    key: controller.formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RegisterHeaderWidget(
-                          maxHeight: constraints.maxHeight,
-                          title: 'Restaurant Info',
-                          subTitle1: '',
-                          subTitle2: '',
-                          subTitle3: '',
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final borderColor = isDark ? AppColor.darkBorder : AppColor.border;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        systemNavigationBarColor:
+        isDark ? AppColor.darkScaffold : AppColor.scaffold,
+        systemNavigationBarIconBrightness:
+        isDark ? Brightness.light : Brightness.dark,
+      ),
+      child: Scaffold(
+        body: Stack(
+          children: [
+            // Background
+            WelcomeBackground(isDark: isDark),
+
+            SafeArea(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: 480,
+                          minHeight: constraints.maxHeight,
                         ),
+                        child: Padding(
+                          padding: EdgeInsets.all(AppSize.xl),
+                          child: IntrinsicHeight(
+                            child: Form(
+                              key: controller.formKey,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Header
+                                  RegisterStepThreeReveal(
+                                    begin: 0.0,
+                                    child: RegisterHeaderWidget(
+                                      maxHeight: constraints.maxHeight,
+                                      title: 'Restaurant Info',
+                                      subTitle1: 'Provide your ',
+                                      subTitle2: 'restaurant details',
+                                      subTitle3:
+                                      ' to complete the setup process.',
+                                    ),
+                                  ),
 
-                        SizedBox(height: AppSize.xl),
+                                  SizedBox(height: AppSize.xl),
 
-                        CustomTextFromField(
-                          controller: controller.restaurantNameController,
-                          label: 'Restaurant Name',
-                          hint: 'Ex: Nanna Restaurant',
-                          isRequired: true,
-                          prefixIcon: const Icon(Ionicons.restaurant),
-                          keyboardType: TextInputType.text,
-                          validator: AppValidators.validateRestaurantName,
+                                  // Form card
+                                  RegisterStepThreeReveal(
+                                    begin: 0.2,
+                                    child: RegisterStepThreeFormCard(
+                                      controller: controller,
+                                      colorScheme: colorScheme,
+                                      borderColor: borderColor,
+                                      isDark: isDark,
+                                    ),
+                                  ),
+
+                                  // Spacer to align submit button at bottom
+                                  const Spacer(),
+                                  SizedBox(height: AppSize.xl),
+
+                                  // Submit button
+                                  RegisterStepThreeReveal(
+                                    begin: 0.4,
+                                    child: Obx(() {
+                                      return CustomButton(
+                                        text: 'Submit',
+                                        isLoading: controller.isLoading.value,
+                                        onPressed: () {
+                                          controller.registerStep3(context);
+                                        },
+                                      );
+                                    }),
+                                  ),
+
+                                  SizedBox(height: AppSize.sm),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
-
-                        SizedBox(height: AppSize.lg),
-
-                        CustomTextFromField(
-                          controller: controller.restaurantAddressController,
-                          label: 'Restaurant Address',
-                          hint: 'Ex: Dhaka BD',
-                          isRequired: true,
-                          prefixIcon: const Icon(Ionicons.location),
-                          keyboardType: TextInputType.text,
-                          validator: AppValidators.validateRestaurantAddress,
-                        ),
-
-                        SizedBox(height: AppSize.lg),
-
-                        CustomTextFromField(
-                          controller:
-                              controller.restaurantDescriptionController,
-                          label: 'Restaurant Description',
-                          hint: 'Ex: This is a best restaurant',
-                          prefixIcon: const Icon(Ionicons.text),
-                          keyboardType: TextInputType.text,
-                          isRequired: true,
-                          validator:
-                              AppValidators.validateRestaurantDescription,
-                        ),
-
-                        SizedBox(height: AppSize.xl * 1.5),
-
-                        Obx(() {
-                          return CustomButton(
-                            text: 'Submit',
-                            isLoading: controller.isLoading.value,
-                            onPressed: () {
-                              controller.registerStep3(context);
-                            },
-                          );
-                        }),
-
-                        SizedBox(height: AppSize.lg),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );

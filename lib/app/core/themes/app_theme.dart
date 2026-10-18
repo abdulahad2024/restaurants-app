@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:restaurants_app/app/core/constants/app_color.dart';
 import 'package:restaurants_app/app/core/constants/app_size..dart';
 
@@ -17,6 +18,7 @@ class AppTheme {
 
   static ThemeData _build(Brightness brightness) {
     final bool isDark = brightness == Brightness.dark;
+
 
     // ── Palette picked by mode ──
     final Color bg = isDark ? AppColor.darkScaffold : AppColor.scaffold;
@@ -62,20 +64,21 @@ class AppTheme {
         );
 
     return ThemeData(
+
       useMaterial3: true,
       brightness: brightness,
       colorScheme: colorScheme,
-      fontFamily: AppFont.family,
+
+
+      fontFamily: GoogleFonts.inter().fontFamily,
+
       scaffoldBackgroundColor: bg,
       primaryColor: AppColor.primary,
       splashColor: AppColor.ripple,
       highlightColor: AppColor.transparent,
       dividerColor: colorScheme.outlineVariant,
       disabledColor: AppColor.textDisabled,
-      textTheme: AppTextStyle.textTheme(
-        primary: textPrimary,
-        secondary: textSecondary,
-      ),
+
 
       // ── AppBar ──
       appBarTheme: AppBarTheme(
@@ -87,9 +90,18 @@ class AppTheme {
         toolbarHeight: AppSize.appBarHeight,
         titleTextStyle: AppTextStyle.h5.copyWith(color: textPrimary),
         iconTheme: IconThemeData(color: textPrimary, size: AppSize.iconMd),
-        systemOverlayStyle: isDark
-            ? SystemUiOverlayStyle.light
-            : SystemUiOverlayStyle.dark,
+
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent, // স্ট্যাটাস বারের ব্যাকগ্রাউন্ড ট্রান্সপারেন্ট করতে
+          statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark, // অ্যান্ড্রয়েডে আইকন কালার (লাইট/ডার্ক)
+          statusBarBrightness: isDark ? Brightness.dark : Brightness.light, // আইওএসের (iOS) জন্য
+
+          // নেভিগেশন বার কালার (নিচের বারের ব্যাকগ্রাউন্ড ও আইকন কালার)
+          systemNavigationBarColor: isDark ? AppColor.darkScaffold : AppColor.scaffold,
+          systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        ),
+
+
       ),
 
       // ── Buttons ──

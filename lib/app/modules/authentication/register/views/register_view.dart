@@ -1,117 +1,114 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:restaurants_app/app/common/custom_widgets/custom_button.dart';
-import 'package:restaurants_app/app/common/custom_widgets/custom_text_from_field.dart';
 import 'package:restaurants_app/app/core/app_config/app_config.dart';
-import 'package:restaurants_app/app/core/constants/app_size..dart';
-import 'package:restaurants_app/app/core/utils/app_validators.dart';
+import 'package:restaurants_app/app/core/constants/app_color.dart';
 import 'package:restaurants_app/app/modules/authentication/register/controllers/register_controller.dart';
 import 'package:restaurants_app/app/modules/authentication/register/widgets/register_footer_widget.dart';
+import 'package:restaurants_app/app/modules/authentication/register/widgets/register_form_card.dart';
 import 'package:restaurants_app/app/modules/authentication/register/widgets/register_header_widget.dart';
+import 'package:restaurants_app/app/modules/authentication/register/widgets/register_reveal.dart';
+import 'package:restaurants_app/app/modules/authentication/welcome/widgets/welcome_background.dart';
+
+import '../../../../core/constants/app_size..dart';
 
 class RegisterView extends GetView<RegisterController> {
   const RegisterView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              padding: EdgeInsets.all(AppSize.xl),
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final borderColor = isDark ? AppColor.darkBorder : AppColor.border;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        systemNavigationBarColor:
+        isDark ? AppColor.darkScaffold : AppColor.scaffold,
+        systemNavigationBarIconBrightness:
+        isDark ? Brightness.light : Brightness.dark,
+      ),
+      child: Scaffold(
+        body: Stack(
+          children: [
+            // Welcome ar Login page er moto same background
+            WelcomeBackground(isDark: isDark),
+
+            SafeArea(
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 480),
-                  child: Form(
-                    key: controller.formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                  child: SingleChildScrollView(
+                    keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: EdgeInsets.all(AppSize.xl),
+                    child: Form(
+                      key: controller.formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Header
+                          RegisterReveal(
+                            begin: 0.0,
+                            child: RegisterHeaderWidget(
+                              maxHeight: screenHeight,
+                              title: 'Create Account',
+                              subTitle1: 'Create an ',
+                              subTitle2: 'account',
+                              subTitle3:
+                              ' to access all the features of ${AppConfig.appName}!',
+                            ),
+                          ),
 
+                          SizedBox(height: AppSize.xl),
 
-                        RegisterHeaderWidget(
-                          maxHeight: constraints.maxHeight,
-                          title: 'Create Account',
-                          subTitle1: 'Create an ',
-                          subTitle2: 'account',
-                          subTitle3: ' to access all the features of ${AppConfig.appName}!',
-                        ),
-                        SizedBox(height: AppSize.xl),
+                          // Form card
+                          RegisterReveal(
+                            begin: 0.2,
+                            child: RegisterFormCard(
+                              controller: controller,
+                              colorScheme: colorScheme,
+                              borderColor: borderColor,
+                              isDark: isDark,
+                            ),
+                          ),
 
-                        // Name Field
-                        CustomTextFromField(
-                          label: 'Your Name',
-                          hint: 'Ex: Abdul Rakip',
-                          controller: controller.nameController,
-                          isRequired: true,
-                          prefixIcon: const Icon(Ionicons.person),
-                          keyboardType: TextInputType.text,
-                          validator: AppValidators.validateName,
-                        ),
+                          SizedBox(height: AppSize.xl),
 
-                        SizedBox(height: AppSize.lg),
+                          // Continue button
+                          RegisterReveal(
+                            begin: 0.35,
+                            child: Obx(() {
+                              return CustomButton(
+                                text: 'Continue',
+                                isLoading: controller.isLoading.value,
+                                onPressed: () {
+                                  controller.registerStep1(context);
+                                },
+                              );
+                            }),
+                          ),
 
-                        // Phone Field
-                        CustomTextFromField(
-                          label: 'Your Phone',
-                          hint: 'Ex: +8801711111111',
-                          controller: controller.phoneController,
-                          isRequired: true,
-                          prefixIcon: const Icon(Ionicons.call),
-                          keyboardType: TextInputType.phone,
-                          validator: AppValidators.validatePhone,
-                        ),
+                          const SizedBox(height: 24),
 
-                        SizedBox(height: AppSize.lg),
-
-                        // Email Field
-                        CustomTextFromField(
-                          label: 'Email',
-                          hint: 'Ex: abc@gmail.com',
-                          controller: controller.emailController,
-                          prefixIcon: const Icon(Ionicons.mail),
-                          keyboardType: TextInputType.emailAddress,
-                          isRequired: true,
-                          validator: AppValidators.validateEmail,
-                        ),
-
-                        SizedBox(height: AppSize.lg),
-
-                        CustomTextFromField(
-                          label: 'Your Password',
-                          hint: '••••••••',
-                          isRequired: true,
-                          controller: controller.passwordController,
-                          isPassword: true,
-                          prefixIcon: const Icon(Ionicons.lockClosed),
-                          keyboardType: TextInputType.visiblePassword,
-                          validator: AppValidators.validatePassword,
-                        ),
-
-                        SizedBox(height: AppSize.xl * 1.5),
-
-                        Obx(() {
-                          return CustomButton(
-                            text: 'Continue',
-                            isLoading: controller.isLoading.value,
-                            onPressed: () {
-                              controller.registerStep1(context);
-                            },
-                          );
-                        }),
-
-                        SizedBox(height: AppSize.lg),
-
-                        const RegisterFooterWidget(),
-                      ],
+                          RegisterReveal(
+                            begin: 0.5,
+                            child: const RegisterFooterWidget(),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );

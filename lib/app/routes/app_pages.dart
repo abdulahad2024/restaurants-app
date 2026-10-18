@@ -10,20 +10,23 @@ import '../modules/authentication/register/bindings/register_binding.dart';
 import '../modules/authentication/register/views/register_step_three_view.dart';
 import '../modules/authentication/register/views/register_step_two_view.dart';
 import '../modules/authentication/register/views/register_view.dart';
+import '../modules/authentication/welcome/bindings/welcome_binding.dart';
+import '../modules/authentication/welcome/views/welcome_view.dart';
 import '../modules/bottom_nav/bottom_navigation/bindings/bottom_navigation_binding.dart';
 import '../modules/bottom_nav/bottom_navigation/views/bottom_navigation_view.dart';
+import '../modules/foods/add_foods/bindings/add_foods_binding.dart';
+import '../modules/foods/add_foods/views/add_foods_view.dart';
 import '../modules/home/home/bindings/home_binding.dart';
 import '../modules/home/home/views/home_view.dart';
 import '../modules/orders/orders/bindings/orders_binding.dart';
 import '../modules/orders/orders/views/orders_view.dart';
-
 
 part 'app_routes.dart';
 
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.LOGIN;
+  static const INITIAL = Routes.WELCOME;
 
   static final routes = [
     GetPage(
@@ -55,13 +58,6 @@ class AppPages {
       name: _Paths.PROFILE,
       page: () => const ProfileView(),
       binding: ProfileBinding(),
-      children: [
-        GetPage(
-          name: _Paths.PROFILE,
-          page: () => const ProfileView(),
-          binding: ProfileBinding(),
-        ),
-      ],
     ),
     GetPage(
       name: _Paths.EDIT_PROFILE,
@@ -82,6 +78,16 @@ class AppPages {
       name: _Paths.ORDERS,
       page: () => const OrdersView(),
       binding: OrdersBinding(),
+    ),
+    GetPage(
+      name: _Paths.WELCOME,
+      page: () => const WelcomeView(),
+      binding: WelcomeBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADD_FOODS,
+      page: () => const AddFoodsView(),
+      binding: AddFoodsBinding(),
     ),
   ];
 }

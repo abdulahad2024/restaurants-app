@@ -1,10 +1,13 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:restaurants_app/app/core/constants/app_color.dart';
 
 enum ToastType { success, error, warning, info }
 
 class CustomToast {
-  CustomToast._(); // Private constructor
+  CustomToast._();
 
   static void show({
     required BuildContext context,
@@ -19,6 +22,7 @@ class CustomToast {
       builder: (context) => _ToastWidget(
         message: message,
         type: type,
+        duration: duration,
         onDismiss: () {
           if (overlayEntry.mounted) {
             overlayEntry.remove();
@@ -28,12 +32,6 @@ class CustomToast {
     );
 
     overlayState.insert(overlayEntry);
-
-    Future.delayed(duration, () {
-      if (overlayEntry.mounted) {
-        overlayEntry.remove();
-      }
-    });
   }
 }
 
@@ -41,11 +39,13 @@ class _ToastWidget extends StatefulWidget {
   const _ToastWidget({
     required this.message,
     required this.type,
+    required this.duration,
     required this.onDismiss,
   });
 
   final String message;
   final ToastType type;
+  final Duration duration;
   final VoidCallback onDismiss;
 
   @override
@@ -57,31 +57,48 @@ class _ToastWidgetState extends State<_ToastWidget>
   late final AnimationController _controller;
   late final Animation<Offset> _offsetAnimation;
   late final Animation<double> _fadeAnimation;
+  Timer? _timer;
+  bool _isClosing = false;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 350),
+      reverseDuration: const Duration(milliseconds: 250),
       vsync: this,
     );
 
-    // ✅ নিচ থেকে উপরে ওঠার জন্য Offset পরিবর্তন করা হয়েছে (1.0 মানে নিচ থেকে আসবে)
+    // Niche theke upore ootha
     _offsetAnimation = Tween<Offset>(
       begin: const Offset(0, 1.0),
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _controller,
-      curve: Curves.easeOut,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeIn,
     ));
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
+    _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
 
     _controller.forward();
+
+    // Shomoy sesh hole nijei bondho hobe (smooth exit shoho)
+    _timer = Timer(widget.duration, _close);
+  }
+
+  /// Age exit animation cholbe, tarpor overlay theke remove hobe.
+  Future<void> _close() async {
+    if (_isClosing || !mounted) return;
+    _isClosing = true;
+    _timer?.cancel();
+    await _controller.reverse();
+    widget.onDismiss();
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -91,13 +108,22 @@ class _ToastWidgetState extends State<_ToastWidget>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
+    final mq = MediaQuery.of(context);
 
     final config = _getToastConfig(widget.type, colorScheme);
+    final surface = isDark ? AppColor.darkCard : AppColor.surface;
+
+    // Halka type-color tint, jate toast ta ke alada kore chena jay
+    final background = Color.alphaBlend(
+      config.color.withValues(alpha: isDark ? 0.14 : 0.07),
+      surface,
+    );
 
     return Stack(
       children: [
         Positioned(
-          bottom: MediaQuery.of(context).padding.bottom + 24,
+          // Keyboard ba system bar er upore thakbe
+          bottom: math.max(mq.padding.bottom, mq.viewInsets.bottom) + 24,
           left: 16,
           right: 16,
           child: Material(
@@ -106,62 +132,129 @@ class _ToastWidgetState extends State<_ToastWidget>
               position: _offsetAnimation,
               child: FadeTransition(
                 opacity: _fadeAnimation,
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 450),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
-                      decoration: BoxDecoration(
-                        color: isDark ? AppColor.darkCard : AppColor.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: config.color.withValues(alpha: 0.4),
-                          width: 1.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: isDark
-                                ? Colors.black.withValues(alpha: 0.4)
-                                : AppColor.shadowDark,
-                            blurRadius: 16,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
+                // Left/right e swipe korle toast soray deya jay
+                child: Dismissible(
+                  key: UniqueKey(),
+                  direction: DismissDirection.horizontal,
+                  onDismissed: (_) => widget.onDismiss(),
+                  child: Container(
+                    // Full width
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: background,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: config.color.withValues(alpha: 0.35),
+                        width: 1.2,
                       ),
-                      child: Row(
+                      boxShadow: [
+                        BoxShadow(
+                          color: isDark
+                              ? Colors.black.withValues(alpha: 0.45)
+                              : AppColor.shadowDark,
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(17),
+                      child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: config.color.withValues(alpha: 0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              config.icon,
-                              color: config.color,
-                              size: 20,
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(14, 14, 10, 14),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // Icon badge
+                                Container(
+                                  height: 40,
+                                  width: 40,
+                                  decoration: BoxDecoration(
+                                    color: config.color,
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: config.color
+                                            .withValues(alpha: 0.35),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    config.icon,
+                                    color: Colors.white,
+                                    size: 22,
+                                  ),
+                                ),
+
+                                const SizedBox(width: 12),
+
+                                // Title + message
+                                Expanded(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        config.title,
+                                        style:
+                                        theme.textTheme.titleSmall?.copyWith(
+                                          color: config.color,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        widget.message,
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                        style:
+                                        theme.textTheme.bodyMedium?.copyWith(
+                                          color: colorScheme.onSurface,
+                                          height: 1.35,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                // Close button
+                                InkWell(
+                                  onTap: _close,
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(6),
+                                    child: Icon(
+                                      Icons.close_rounded,
+                                      size: 20,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Flexible(
-                            child: Text(
-                              widget.message,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onSurface,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: widget.onDismiss,
-                            child: Icon(
-                              Icons.close,
-                              size: 18,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
+
+                          // Baki shomoy dekhano progress bar
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 1.0, end: 0.0),
+                            duration: widget.duration,
+                            builder: (context, value, _) {
+                              return Align(
+                                alignment: Alignment.centerLeft,
+                                child: FractionallySizedBox(
+                                  widthFactor: value,
+                                  child: Container(
+                                    height: 3,
+                                    color: config.color.withValues(alpha: 0.7),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -182,21 +275,25 @@ class _ToastWidgetState extends State<_ToastWidget>
         return _ToastConfig(
           icon: Icons.check_circle_rounded,
           color: AppColor.success,
+          title: 'Success',
         );
       case ToastType.error:
         return _ToastConfig(
           icon: Icons.error_rounded,
           color: AppColor.error,
+          title: 'Error',
         );
       case ToastType.warning:
         return _ToastConfig(
           icon: Icons.warning_rounded,
           color: AppColor.warning,
+          title: 'Warning',
         );
       case ToastType.info:
         return _ToastConfig(
           icon: Icons.info_rounded,
           color: colorScheme.primary,
+          title: 'Info',
         );
     }
   }
@@ -205,6 +302,11 @@ class _ToastWidgetState extends State<_ToastWidget>
 class _ToastConfig {
   final IconData icon;
   final Color color;
+  final String title;
 
-  _ToastConfig({required this.icon, required this.color});
+  _ToastConfig({
+    required this.icon,
+    required this.color,
+    required this.title,
+  });
 }
