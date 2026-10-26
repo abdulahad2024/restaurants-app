@@ -20,13 +20,15 @@ import '../modules/home/home/bindings/home_binding.dart';
 import '../modules/home/home/views/home_view.dart';
 import '../modules/orders/orders/bindings/orders_binding.dart';
 import '../modules/orders/orders/views/orders_view.dart';
+import '../modules/spalsh/bindings/spalsh_binding.dart';
+import '../modules/spalsh/views/spalsh_view.dart';
 
 part 'app_routes.dart';
 
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.WELCOME;
+  static const INITIAL = Routes.SPALSH;
 
   static final routes = [
     GetPage(
@@ -88,6 +90,11 @@ class AppPages {
       name: _Paths.ADD_FOODS,
       page: () => const AddFoodsView(),
       binding: AddFoodsBinding(),
+    ),
+    GetPage(
+      name: _Paths.SPALSH,
+      page: () => const SplashView(),
+      binding: SplashBinding(),
     ),
   ];
 }

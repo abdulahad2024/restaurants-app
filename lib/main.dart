@@ -5,11 +5,13 @@ import 'package:restaurants_app/app/core/app_config/app_config.dart';
 import 'app/core/constants/app_size..dart';
 import 'app/core/themes/app_theme.dart';
 import 'app/routes/app_pages.dart';
+
 Future<void> main() async {
-
-  await GetStorage.init();
-
+  // 🟢 ১. সবার আগে ফ্লাটার বাইন্ডিং সুনিশ্চিত করতে হবে
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 🟢 ২. এরপর GetStorage ইনিশিয়ালাইজ করতে হবে
+  await GetStorage.init();
 
   runApp(
     GetMaterialApp(

@@ -3,26 +3,40 @@ import 'package:get_storage/get_storage.dart';
 class StorageService {
   final _box = GetStorage();
 
-  // Key-গুলো কনস্ট্যান্ট হিসেবে রাখা প্রোডাকশন লেভেলের স্ট্যান্ডার্ড
   static const String _tokenKey = 'auth_token';
-  static const String _userKey = 'user_data';
+  static const String _isFirstTimeKey = 'is_first_time';
+  static const String _regStepKey = 'registration_step'; // 1, 2, 3 বা 0 (Complete)
 
-  // টোকেন সেভ করার মেথড
   Future<void> saveToken(String token) async {
     await _box.write(_tokenKey, token);
   }
 
-  // টোকেন রিড বা গেট করার মেথড
   String? getToken() {
     return _box.read<String>(_tokenKey);
   }
 
-  // টোকেন রিমুভ বা ডিলিট করার মেথড (লগআউটের সময় লাগবে)
   Future<void> removeToken() async {
     await _box.remove(_tokenKey);
   }
 
-  // পুরো বক্স ক্লিয়ার করার জন্য
+  // ── First Time Check (Welcome Screen) ──
+  Future<void> setFirstTimeDone() async {
+    await _box.write(_isFirstTimeKey, false);
+  }
+
+  bool isFirstTime() {
+    return _box.read<bool>(_isFirstTimeKey) ?? true; // বাই-ডিফল্ট true থাকবে
+  }
+
+  // ── Registration Step Tracking ──
+  Future<void> saveRegistrationStep(int step) async {
+    await _box.write(_regStepKey, step);
+  }
+
+  int getRegistrationStep() {
+    return _box.read<int>(_regStepKey) ?? 0; // 0 মানে কোনো রেজিস্ট্রেশন শুরু হয়নি
+  }
+
   Future<void> clearStorage() async {
     await _box.erase();
   }

@@ -11,7 +11,7 @@ class ApiUrl {
   static const String registerStepTwo = "register/step-2";
   static const String registerStepThree = "register/step-3";
   static const String login = "login";
-  static const String profile = "user/profile";
+  static const String profile = "me";
 
   // --- 1. Auth / Authentication Endpoints ---
   static const String register = "register"; // এটি ব্যবহার না করে ওপরের step-1 ব্যবহার করবেন

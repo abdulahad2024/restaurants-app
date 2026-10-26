@@ -38,11 +38,9 @@ class LoginController extends GetxController {
 
       if (kDebugMode) print("Login API Response: $response");
 
-      // যেহেতু response সরাসরি একটি Map (যেমন: {"token": "...", "restaurant_user": {...}})
       if (response != null && response['token'] != null) {
         String token = response['token'];
 
-        // লোকাল স্টোরেজে টোকেন সেভ করা
         await _storageService.saveToken(token);
         if (kDebugMode) print("Token Saved Successfully: $token");
 

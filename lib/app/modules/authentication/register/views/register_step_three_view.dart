@@ -34,7 +34,6 @@ class RegisterStepThreeView extends GetView<RegisterController> {
       child: Scaffold(
         body: Stack(
           children: [
-            // Background
             WelcomeBackground(isDark: isDark),
 
             SafeArea(
@@ -83,11 +82,9 @@ class RegisterStepThreeView extends GetView<RegisterController> {
                                     ),
                                   ),
 
-                                  // Spacer to align submit button at bottom
                                   const Spacer(),
                                   SizedBox(height: AppSize.xl),
 
-                                  // Submit button
                                   RegisterStepThreeReveal(
                                     begin: 0.4,
                                     child: Obx(() {

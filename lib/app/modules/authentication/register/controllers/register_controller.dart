@@ -142,8 +142,7 @@ class RegisterController extends GetxController {
 
       if (kDebugMode) print("Step 2 API Response: $response");
 
-      // যেহেতু NetworkApiService সফল হলে সরাসরি জেসন বডি রিটার্ন করে,
-      // তাই এখানে response সরাসরি পেয়ে যাবেন (response.statusCode লাগবে না)
+
       if (response != null) {
         CustomToast.show(
           context: context,
@@ -190,16 +189,14 @@ class RegisterController extends GetxController {
         'restaurant_description': restaurantDescriptionController.text.trim(),
       };
 
-      // সেফলি টোকেন রিড করা (নাল হলে এম্টি স্ট্রিং বা হ্যান্ডেল করা)
       String? token = _storageService.getToken();
       if (kDebugMode) print("Step 3 Token: $token");
 
       if (token == null || token.isEmpty) {
-        Get.snackbar(
-          "Error",
-          "Authentication token not found. Please login again.",
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+        CustomToast.show(
+          context: context,
+          message: "Authentication token not found. Please login again.",
+          type: ToastType.error,
         );
         return;
       }
@@ -208,7 +205,6 @@ class RegisterController extends GetxController {
 
       if (kDebugMode) print("Step 3 API Response: $response");
 
-      // যেহেতু NetworkApiService সফল হলে সরাসরি বডি (json) রিটার্ন করে
       if (response != null) {
         CustomToast.show(
           context: context,
@@ -216,7 +212,7 @@ class RegisterController extends GetxController {
           type: ToastType.success,
         );
 
-        Get.offNamed(Routes.BOTTOM_NAVIGATION);
+        Get.offAllNamed(Routes.BOTTOM_NAVIGATION);
       } else {
         CustomToast.show(
           context: context,
